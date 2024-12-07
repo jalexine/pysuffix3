@@ -10,7 +10,7 @@ def simple_kark_sort(s):
     alpha = sorted(set(s))
     kark_sort(s, SA, n, alpha)
     # Return only the original sequence (without extra chars) and the first n elements of SA
-    return s[:n], SA[:n]
+    return SA[:n]
 
 
 def kark_sort(s, SA, n, alpha):
@@ -18,10 +18,12 @@ def kark_sort(s, SA, n, alpha):
     n1 = (n + 1) // 3
     n2 = n // 3
     n02 = n0 + n2
+    s12 = []
+
 
     # Positions of mod 1 and mod 2 suffixes
     s12 = [i for i in range(n + n0 - n1) if i % 3 != 0]
-    s12 += [0, 0, 0]
+    s12.extend([0,0,0])
     SA12 = [0]*(n02+3)
 
     # Radix sort on s12
@@ -31,23 +33,23 @@ def kark_sort(s, SA, n, alpha):
 
     # Assign ranks
     name = 0
-    c0 = c1 = c2 = -1
+    c0, c1, c2 = -1, -1, -1
+    array_name = [0]
     for i in range(n02):
-        if (s[SA12[i]], s[SA12[i]+1], s[SA12[i]+2]) != (c0, c1, c2):
+      if s[SA12[i]] != c0 or s[SA12[i]+1] != c1 or s[SA12[i]+2] != c2 :
             name += 1
             c0 = s[SA12[i]]
             c1 = s[SA12[i]+1]
             c2 = s[SA12[i]+2]
-
-        if SA12[i] % 3 == 1:
-            s12[SA12[i]//3] = name
-        else:
-            s12[(SA12[i]//3)+n0] = name
+      if SA12[i] % 3 == 1:
+          s12[SA12[i]//3] = name
+      else:
+          s12[(SA12[i]//3)+n0] = name
 
     # Recurse if not all unique
     if name < n02:
-        kark_sort(s12, SA12, n02, list(range(name+1)))
-        for i in range(n02):
+      kark_sort(s12, SA12, n02, array_name)
+      for i in range(n02):
             s12[SA12[i]] = i + 1
     else:
         for i in range(n02):
@@ -63,51 +65,41 @@ def kark_sort(s, SA, n, alpha):
     t = n0 - n1
     k = 0
 
-    while k < n:
-        if t == n02:
-            # Append remaining SA0 suffixes
-            while p < n0:
-                SA[k] = SA0[p]
-                p += 1
-                k += 1
-            break
-        if p == n0:
-            # Append remaining SA12 suffixes
-            while t < n02:
-                pos = SA12[t]
-                SA[k] = pos*3+1 if pos<n0 else (pos-n0)*3+2
-                t += 1
-                k += 1
-            break
+    while k < n :
+      i = SA12[t]*3+1 if SA12[t]<n0 else (SA12[t] - n0 ) * 3 + 2
 
-        # Compare suffixes
-        pos12 = SA12[t]
-        i = pos12*3+1 if pos12<n0 else (pos12-n0)*3+2
-        j = SA0[p]
+      #j = p < n0 and SA0[p] or 0
+      j = SA0[p] if p < n0 else 0
+ 
+      if SA12[t] < n0 :
+        test = (s12[SA12[t]+n0] <= s12[j//3]) if(s[i]==s[j]) else (s[i] < s[j])
+      elif(s[i]==s[j]) :
+          test = s12[SA12[t]-n0+1] <= s12[j//3 + n0] if(s[i+1]==s[j+1]) else s[i+1] < s[j+1]
+      else :
+        test = s[i] < s[j]
 
-        if pos12 < n0:
-            # Compare first char; if tie, compare ranks
-            test = (s[i]<s[j]) or (s[i]==s[j] and s12[pos12+n0]<=s12[j//3])
-        else:
-            # mod-2 suffix
-            if s[i]!=s[j]:
-                test = (s[i]<s[j])
-            else:
-                # Compare next char if tie
-                i1 = i+1
-                j1 = j+1
-                if s[i1]!=s[j1]:
-                    test = s[i1]<s[j1]
-                else:
-                    test = s12[pos12 - n0 + 1]<=s12[(j//3)+n0]
-
-        if test:
-            SA[k] = i
-            t += 1
-        else:
-            SA[k] = j
+      if(test) :
+        SA[k] = i
+        t += 1
+        if t == n02 : 
+          k += 1
+          l = n0 - p
+          while p < n0 :
+            SA[k] = SA0[p]
             p += 1
-        k += 1
+            k += 1
+      
+      else : 
+        SA[k] = j
+        p += 1
+        if p == n0 :
+          k += 1
+          while t < n02 :
+            SA[k] = (SA12[t] * 3) + 1 if SA12[t] < n0 else ((SA12[t] - n0) * 3) + 2
+            t += 1
+            k += 1
+      k += 1
+
 
 def radixpass(a, b, r, n, k):
     c = {}
