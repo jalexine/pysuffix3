@@ -121,7 +121,3 @@ def LCP(s, suffix_array):
 
 if __name__ == '__main__':
     print("tools.py")
-    return LCP
-
-if __name__ == '__main__':
-    print("tools.py")
