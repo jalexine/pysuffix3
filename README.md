@@ -1,4 +1,4 @@
-##Fork of PySuffix, updated for Python 3 compatibility.
+#Fork of PySuffix, updated for Python 3 compatibility.
 
 I mainly updated tools `tools_karkkainen_sanders.py`
 
